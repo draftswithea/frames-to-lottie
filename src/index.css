@@ -1,0 +1,70 @@
+@import url("https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap");
+
+:root {
+  --bg: #fff6f3;
+  --surface: #ffffff;
+  --surface-sunken: #fdede8;
+  --ink: #2b1620;
+  --ink-soft: #7a5a67;
+  --accent: #d93a5f;
+  --accent-soft: #fde3ea;
+  --coral: #ff8a5c;
+  --success: #2e9e6c;
+  --danger: #c0392b;
+  --border: #f2dcd8;
+  --checker-a: #ffffff;
+  --checker-b: #f6e6e1;
+  --mono: "Figtree", sans-serif;
+  --sans: "Figtree", sans-serif;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1a1218;
+    --surface: #251a22;
+    --surface-sunken: #1e151c;
+    --ink: #fdf0f4;
+    --ink-soft: #c3a2af;
+    --accent: #ff8fa8;
+    --accent-soft: #3b1f2b;
+    --coral: #ffa07a;
+    --success: #4cc492;
+    --danger: #f0776c;
+    --border: #3c2833;
+    --checker-a: #251a22;
+    --checker-b: #2e2028;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #1a1218;
+  --surface: #251a22;
+  --surface-sunken: #1e151c;
+  --ink: #fdf0f4;
+  --ink-soft: #c3a2af;
+  --accent: #ff8fa8;
+  --accent-soft: #3b1f2b;
+  --coral: #ffa07a;
+  --success: #4cc492;
+  --danger: #f0776c;
+  --border: #3c2833;
+  --checker-a: #251a22;
+  --checker-b: #2e2028;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+}
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  min-height: 100vh;
+}
