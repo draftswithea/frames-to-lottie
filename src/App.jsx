@@ -38,10 +38,26 @@ export default function App() {
     );
   }
 
+  function removeJob(jobId) {
+    setJobs((prev) => {
+      const job = prev.find((j) => j.id === jobId);
+      if (job) {
+        // Frames with a blob: thumbUrl (PNGs, including auto-rasterized SVG
+        // frames) hold a live object URL -- release it now that the job
+        // and its zip data are being dropped entirely.
+        job.frames.forEach((f) => {
+          if (f.thumbUrl && f.thumbUrl.startsWith("blob:"))
+            URL.revokeObjectURL(f.thumbUrl);
+        });
+      }
+      return prev.filter((j) => j.id !== jobId);
+    });
+  }
+
   return (
     <div className="wrap">
       <header>
-        <img src="/logo.svg" />
+        <img src="/logo.svg" alt="Logo" width={50} height={50} />
         <p className="kicker">
           svg + png sequence → lottie, entirely in-browser
         </p>
@@ -80,18 +96,24 @@ export default function App() {
             job={job}
             options={options}
             onFramesChange={(next) => updateJobFrames(job.id, next)}
+            onRemove={() => removeJob(job.id)}
           />
         ))
       )}
 
       <div className="footnote">
-        SVG parsing covers <code>&lt;path&gt;</code> elements using{" "}
-        <code>M/L/C/Z</code> commands, reading <code>fill</code>,{" "}
-        <code>stroke</code>, <code>stroke-width</code> and{" "}
-        <code>fill-rule</code>. Gradients, filters, clip-paths, embedded images,
-        text, and group transforms aren't converted. PNG frames are embedded as
-        image layers (raster), so they won't rescale as crisply as vector frames
-        at very large sizes.
+        SVG parsing covers <code>&lt;path&gt;</code> (<code>M/L/C/Z</code>{" "}
+        commands), <code>&lt;circle&gt;</code>, <code>&lt;ellipse&gt;</code>,{" "}
+        <code>&lt;rect&gt;</code>, <code>&lt;line&gt;</code>,{" "}
+        <code>&lt;polyline&gt;</code> and <code>&lt;polygon&gt;</code>. Fill and
+        stroke are resolved like a real renderer: inline <code>style</code>,{" "}
+        <code>&lt;style&gt;</code> class rules, presentation attributes, and
+        inheritance from parent elements, in hex/rgb/hsl/named-color formats. A
+        frame using gradients, filters, masks, clip-paths,{" "}
+        <code>&lt;use&gt;</code>, text, or transforms is automatically
+        rasterized to PNG instead of being converted (shown as <code>png*</code>{" "}
+        on its thumbnail), since those aren't safe to convert to flat vector
+        shapes.
       </div>
     </div>
   );

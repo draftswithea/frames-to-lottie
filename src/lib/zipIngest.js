@@ -1,4 +1,5 @@
 import JSZip from "jszip";
+import { svgNeedsRaster, rasterizeSvgToPng, pickRasterSize } from "./svgRaster.js";
 
 function naturalCompare(a, b) {
   return a.localeCompare(b, undefined, { numeric: true });
@@ -51,6 +52,31 @@ export async function ingestZip(file) {
       const root = doc.documentElement;
       const w = parseFloat((root.getAttribute("width") || "1000").replace(/[a-zA-Z%]/g, "")) || 1000;
       const h = parseFloat((root.getAttribute("height") || "1000").replace(/[a-zA-Z%]/g, "")) || 1000;
+
+      if (svgNeedsRaster(text)) {
+        try {
+          const rasterSize = pickRasterSize(w, h);
+          const { bytes, width, height } = await rasterizeSvgToPng(text, rasterSize);
+          const blob = new Blob([bytes], { type: "image/png" });
+          const thumbUrl = URL.createObjectURL(blob);
+          frames.push({
+            id: entry.name,
+            type: "png",
+            name: baseName,
+            bytes,
+            width,
+            height,
+            thumbUrl,
+            rasterized: true,
+          });
+          continue;
+        } catch (err) {
+          // Best effort: fall through and try converting as vector anyway
+          // rather than dropping the frame entirely.
+          console.warn("raster fallback failed for", entry.name, err);
+        }
+      }
+
       const thumbUrl = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(text)));
       frames.push({
         id: entry.name,

@@ -1,3 +1,5 @@
+import { getInheritedProp, getCumulativeOpacity, parseOpacityValue, resolveColorToRgba, parseStylesheetRules } from "./svgStyle.js";
+
 // Parses an SVG path 'd' string containing only M/L/C/Z commands (absolute
 // coordinates) into subpaths of Lottie-style bezier vertices with in/out
 // tangent handles relative to their own vertex.
@@ -83,42 +85,170 @@ export function hexToRgb1(hex) {
   return [r, g, b];
 }
 
-function shapeGroupFromPathEl(el, idx) {
-  const d = el.getAttribute("d");
-  if (!d) return null;
-  const subpaths = parsePathD(d);
-  if (!subpaths.length) return null;
+function num(v, fallback = 0) {
+  const n = parseFloat(v);
+  return isNaN(n) ? fallback : n;
+}
 
-  const fill = el.getAttribute("fill");
-  const stroke = el.getAttribute("stroke");
-  const strokeWidth = el.getAttribute("stroke-width");
-  const fillRule = el.getAttribute("fill-rule") || "nonzero";
-  const lottieFillRule = fillRule === "evenodd" ? 2 : 1;
+// Converts one already-classified shape element (circle/ellipse/rect/line/
+// polyline/polygon/path) into the array of Lottie "shape content" items
+// (the "sh"/"el"/"rc" entries that go before fill/stroke/transform in a
+// shape group). Returns null if the element has nothing renderable.
+function shapeContentFromEl(el) {
+  const tag = el.tagName.toLowerCase();
 
-  const items = [];
-  for (const sp of subpaths) {
-    items.push({
+  if (tag === "path") {
+    const d = el.getAttribute("d");
+    if (!d) return null;
+    const subpaths = parsePathD(d);
+    if (!subpaths.length) return null;
+    return subpaths.map((sp) => ({
       ty: "sh",
       ix: 1,
       ks: { a: 0, k: { c: sp.closed, i: sp.in, o: sp.out, v: sp.verts } },
       nm: "Path",
-    });
+    }));
   }
-  if (fill && fill !== "none") {
+
+  if (tag === "circle") {
+    const cx = num(el.getAttribute("cx"));
+    const cy = num(el.getAttribute("cy"));
+    const r = num(el.getAttribute("r"));
+    if (r <= 0) return null;
+    return [
+      {
+        ty: "el",
+        p: { a: 0, k: [cx, cy] },
+        s: { a: 0, k: [r * 2, r * 2] },
+        nm: "Ellipse",
+      },
+    ];
+  }
+
+  if (tag === "ellipse") {
+    const cx = num(el.getAttribute("cx"));
+    const cy = num(el.getAttribute("cy"));
+    const rx = num(el.getAttribute("rx"));
+    const ry = num(el.getAttribute("ry"));
+    if (rx <= 0 || ry <= 0) return null;
+    return [
+      {
+        ty: "el",
+        p: { a: 0, k: [cx, cy] },
+        s: { a: 0, k: [rx * 2, ry * 2] },
+        nm: "Ellipse",
+      },
+    ];
+  }
+
+  if (tag === "rect") {
+    const x = num(el.getAttribute("x"));
+    const y = num(el.getAttribute("y"));
+    const w = num(el.getAttribute("width"));
+    const h = num(el.getAttribute("height"));
+    if (w <= 0 || h <= 0) return null;
+    let rx = el.hasAttribute("rx") ? num(el.getAttribute("rx")) : null;
+    let ry = el.hasAttribute("ry") ? num(el.getAttribute("ry")) : null;
+    if (rx == null && ry != null) rx = ry;
+    if (ry == null && rx != null) ry = rx;
+    return [
+      {
+        ty: "rc",
+        p: { a: 0, k: [x + w / 2, y + h / 2] },
+        s: { a: 0, k: [w, h] },
+        r: { a: 0, k: rx || 0 },
+        nm: "Rectangle",
+      },
+    ];
+  }
+
+  if (tag === "line") {
+    const x1 = num(el.getAttribute("x1"));
+    const y1 = num(el.getAttribute("y1"));
+    const x2 = num(el.getAttribute("x2"));
+    const y2 = num(el.getAttribute("y2"));
+    return [
+      {
+        ty: "sh",
+        ix: 1,
+        ks: {
+          a: 0,
+          k: {
+            c: false,
+            i: [[0, 0], [0, 0]],
+            o: [[0, 0], [0, 0]],
+            v: [[x1, y1], [x2, y2]],
+          },
+        },
+        nm: "Line",
+      },
+    ];
+  }
+
+  if (tag === "polyline" || tag === "polygon") {
+    const pointsAttr = el.getAttribute("points") || "";
+    const nums = pointsAttr.trim().split(/[\s,]+/).map(Number).filter((n) => !isNaN(n));
+    const verts = [];
+    for (let i = 0; i + 1 < nums.length; i += 2) verts.push([nums[i], nums[i + 1]]);
+    if (verts.length < 2) return null;
+    return [
+      {
+        ty: "sh",
+        ix: 1,
+        ks: {
+          a: 0,
+          k: {
+            c: tag === "polygon",
+            i: verts.map(() => [0, 0]),
+            o: verts.map(() => [0, 0]),
+            v: verts,
+          },
+        },
+        nm: tag === "polygon" ? "Polygon" : "Polyline",
+      },
+    ];
+  }
+
+  return null;
+}
+
+function shapeGroupFromEl(el, idx, rules) {
+  const shapeContent = shapeContentFromEl(el);
+  if (!shapeContent || !shapeContent.length) return null;
+
+  const tag = el.tagName.toLowerCase();
+  // Bare <line> elements have no fill by definition even if a fill value
+  // resolves to something -- SVG never paints a fill for <line>.
+  const allowFill = tag !== "line";
+
+  const fillRaw = allowFill ? getInheritedProp(el, rules, "fill", "black") : "none";
+  const strokeRaw = getInheritedProp(el, rules, "stroke", "none");
+  const strokeWidthRaw = getInheritedProp(el, rules, "stroke-width", "1");
+  const fillRuleRaw = getInheritedProp(el, rules, "fill-rule", "nonzero");
+  const fillOpacityRaw = getInheritedProp(el, rules, "fill-opacity", "1");
+  const strokeOpacityRaw = getInheritedProp(el, rules, "stroke-opacity", "1");
+  const elementOpacity = getCumulativeOpacity(el, rules);
+
+  const fillColor = resolveColorToRgba(fillRaw);
+  const strokeColor = resolveColorToRgba(strokeRaw);
+  const lottieFillRule = fillRuleRaw === "evenodd" ? 2 : 1;
+
+  const items = [...shapeContent];
+  if (fillColor) {
     items.push({
       ty: "fl",
-      c: { a: 0, k: [...hexToRgb1(fill), 1] },
-      o: { a: 0, k: 100 },
+      c: { a: 0, k: [fillColor.r, fillColor.g, fillColor.b, 1] },
+      o: { a: 0, k: Math.round(fillColor.a * parseOpacityValue(fillOpacityRaw) * 100) },
       r: lottieFillRule,
       nm: "Fill",
     });
   }
-  if (stroke && stroke !== "none") {
+  if (strokeColor) {
     items.push({
       ty: "st",
-      c: { a: 0, k: [...hexToRgb1(stroke), 1] },
-      o: { a: 0, k: 100 },
-      w: { a: 0, k: strokeWidth ? parseFloat(strokeWidth) : 1 },
+      c: { a: 0, k: [strokeColor.r, strokeColor.g, strokeColor.b, 1] },
+      o: { a: 0, k: Math.round(strokeColor.a * parseOpacityValue(strokeOpacityRaw) * 100) },
+      w: { a: 0, k: parseFloat(strokeWidthRaw) || 1 },
       lc: 2,
       lj: 2,
       nm: "Stroke",
@@ -130,7 +260,7 @@ function shapeGroupFromPathEl(el, idx) {
     a: { a: 0, k: [0, 0] },
     s: { a: 0, k: [100, 100] },
     r: { a: 0, k: 0 },
-    o: { a: 0, k: 100 },
+    o: { a: 0, k: Math.round(elementOpacity * 100) },
     sk: { a: 0, k: 0 },
     sa: { a: 0, k: 0 },
   });
@@ -138,12 +268,12 @@ function shapeGroupFromPathEl(el, idx) {
   return {
     ty: "gr",
     it: items,
-    nm: el.getAttribute("id") || "path_" + idx,
+    nm: el.getAttribute("id") || tag + "_" + idx,
     np: items.length,
     cix: 2,
     bm: 0,
     ix: idx,
-    mn: "path_" + idx,
+    mn: tag + "_" + idx,
   };
 }
 
@@ -153,9 +283,10 @@ function stripUnits(val, fallback) {
   return isNaN(n) ? fallback : n;
 }
 
-// Parses one SVG document's <path> elements (in SVG paint order) into
-// Lottie shape-group items, reversed so the first item in the returned
-// array is the topmost shape (Lottie's convention).
+// Parses one SVG document's shape elements (path, circle, ellipse, rect,
+// line, polyline, polygon) in SVG paint order into Lottie shape-group
+// items, reversed so the first item in the returned array is the topmost
+// shape (Lottie's convention).
 export function svgToShapeItems(svgText) {
   const doc = new DOMParser().parseFromString(svgText, "image/svg+xml");
   const root = doc.documentElement;
@@ -174,10 +305,13 @@ export function svgToShapeItems(svgText) {
   if (width == null) width = 1000;
   if (height == null) height = 1000;
 
-  const pathEls = Array.from(root.querySelectorAll("path"));
+  const rules = parseStylesheetRules(doc);
+  const shapeEls = Array.from(
+    root.querySelectorAll("path, circle, ellipse, rect, line, polyline, polygon")
+  );
   const shapeItems = [];
-  pathEls.reverse().forEach((el, idx) => {
-    const item = shapeGroupFromPathEl(el, idx);
+  shapeEls.reverse().forEach((el, idx) => {
+    const item = shapeGroupFromEl(el, idx, rules);
     if (item) shapeItems.push(item);
   });
   return { shapeItems, width, height };

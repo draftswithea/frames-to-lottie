@@ -15,17 +15,19 @@ function downloadBlob(filename, blob) {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
-export default function JobCard({ job, options, onFramesChange }) {
+export default function JobCard({ job, options, onFramesChange, onRemove }) {
   const { name, frames } = job;
   const [previewData, setPreviewData] = useState(null);
   const [exporting, setExporting] = useState(null); // 'lottie' | 'json' | null
 
   const typeBreakdown = useMemo(() => {
-    const svgCount = frames.filter((f) => f.type === "svg").length;
-    const pngCount = frames.filter((f) => f.type === "png").length;
+    const svgCount = frames.filter((f) => f.type === "svg" && !f.rasterized).length;
+    const pngCount = frames.filter((f) => f.type === "png" && !f.rasterized).length;
+    const rasterizedCount = frames.filter((f) => f.rasterized).length;
     const parts = [];
     if (svgCount) parts.push(`${svgCount} svg`);
     if (pngCount) parts.push(`${pngCount} png`);
+    if (rasterizedCount) parts.push(`${rasterizedCount} auto-converted to png`);
     return parts.join(" + ");
   }, [frames]);
 
@@ -89,6 +91,17 @@ export default function JobCard({ job, options, onFramesChange }) {
           </button>
           <button className="dl filled" onClick={handleExportLottie} disabled={exporting !== null || !frames.length}>
             {exporting === "lottie" ? "Exporting…" : "Export .lottie"}
+          </button>
+          <button
+            className="job-delete"
+            onClick={onRemove}
+            disabled={exporting !== null}
+            aria-label={`Remove ${name} and its frames`}
+            title="Remove this sequence"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M4 7h16M9 7V4h6v3M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
         </div>
       </div>

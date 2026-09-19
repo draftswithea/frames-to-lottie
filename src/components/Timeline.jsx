@@ -54,7 +54,7 @@ export default function Timeline({ frames, onChange }) {
             onDragOver={(e) => handleDragOver(e, index)}
             onDrop={(e) => handleDrop(e, index)}
             onDragEnd={handleDragEnd}
-            title={frame.name}
+            title={frame.rasterized ? frame.name + " (auto-converted to PNG: uses gradients/effects our vector parser can't convert)" : frame.name}
           >
             <button
               className="timeline-remove"
@@ -68,7 +68,7 @@ export default function Timeline({ frames, onChange }) {
             </div>
             <div className="timeline-meta">
               <span className="timeline-index">{index + 1}</span>
-              <span className="timeline-type">{frame.type}</span>
+              <span className="timeline-type">{frame.rasterized ? "png*" : frame.type}</span>
             </div>
           </div>
         ))}

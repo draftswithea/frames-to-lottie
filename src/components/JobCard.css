@@ -72,6 +72,32 @@ button.dl.filled:hover:not(:disabled) {
   opacity: 0.85;
 }
 
+.job-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.job-delete:hover:not(:disabled) {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: white;
+}
+
+.job-delete:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .job-body {
   display: grid;
   grid-template-columns: 140px 1fr;

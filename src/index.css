@@ -1,19 +1,19 @@
 @import url("https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap");
 
 :root {
-  --bg: #fff6f3;
+  --bg: #fdf8f7;
   --surface: #ffffff;
-  --surface-sunken: #fdede8;
-  --ink: #2b1620;
-  --ink-soft: #7a5a67;
-  --accent: #d93a5f;
-  --accent-soft: #fde3ea;
-  --coral: #ff8a5c;
+  --surface-sunken: #f8efee;
+  --ink: #2b1a21;
+  --ink-soft: #7b5f6a;
+  --accent: #cf4368;
+  --accent-soft: #fbe3e9;
+  --coral: #f88379;
   --success: #2e9e6c;
-  --danger: #c0392b;
-  --border: #f2dcd8;
+  --danger: #c6493f;
+  --border: #ecdcdd;
   --checker-a: #ffffff;
-  --checker-b: #f6e6e1;
+  --checker-b: #f3e9e9;
   --mono: "Figtree", sans-serif;
   --sans: "Figtree", sans-serif;
   color-scheme: light dark;
@@ -21,36 +21,36 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #1a1218;
-    --surface: #251a22;
-    --surface-sunken: #1e151c;
-    --ink: #fdf0f4;
-    --ink-soft: #c3a2af;
-    --accent: #ff8fa8;
-    --accent-soft: #3b1f2b;
-    --coral: #ffa07a;
+    --bg: #191217;
+    --surface: #221a20;
+    --surface-sunken: #1d1519;
+    --ink: #faf0f3;
+    --ink-soft: #bfa3ad;
+    --accent: #ff9db4;
+    --accent-soft: #3a1f2b;
+    --coral: #ff9d94;
     --success: #4cc492;
     --danger: #f0776c;
-    --border: #3c2833;
-    --checker-a: #251a22;
-    --checker-b: #2e2028;
+    --border: #3a2a32;
+    --checker-a: #241b21;
+    --checker-b: #2c2128;
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #1a1218;
-  --surface: #251a22;
-  --surface-sunken: #1e151c;
-  --ink: #fdf0f4;
-  --ink-soft: #c3a2af;
-  --accent: #ff8fa8;
-  --accent-soft: #3b1f2b;
-  --coral: #ffa07a;
+  --bg: #191217;
+  --surface: #221a20;
+  --surface-sunken: #1d1519;
+  --ink: #faf0f3;
+  --ink-soft: #bfa3ad;
+  --accent: #ff9db4;
+  --accent-soft: #3a1f2b;
+  --coral: #ff9d94;
   --success: #4cc492;
   --danger: #f0776c;
-  --border: #3c2833;
-  --checker-a: #251a22;
-  --checker-b: #2e2028;
+  --border: #3a2a32;
+  --checker-a: #241b21;
+  --checker-b: #2c2128;
 }
 
 * {
