@@ -1,7 +1,12 @@
-# SVG/PNG sequence → Lottie studio
+<img
+  src="https://raw.githubusercontent.com/draftswithea/draftswithea/main/assets/draftswithea-indicator.png"
+  alt="dataform"
+  style="display: block; margin: 0 auto;"
+  width="300"
+/>
 
-A small React app that turns a numbered sequence of frame images (SVG or PNG,
-in a zip) into a Lottie animation — entirely in the browser, no server or
+A React app that turns a numbered sequence of **frame images (SVG or PNG,
+in a zip) into a Lottie animation** — entirely in the browser, no server or
 native binaries involved.
 
 - **SVG frames** are parsed directly into native Lottie vector shapes
@@ -71,3 +76,7 @@ supported either; convert to cubics upstream if needed.
 PNG frames are embedded as full-resolution image layers with no
 compression beyond PNG's own — large sequences at large sizes can produce
 sizeable `.lottie`/`.json` files.
+
+## License
+
+[MIT LICENSE](./LICENSE.md)

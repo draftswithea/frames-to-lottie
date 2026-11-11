@@ -57,10 +57,12 @@ export default function App() {
   return (
     <div className="wrap">
       <header>
-        <img src="/logo.svg" alt="Logo" width={50} height={50} />
-        <p className="kicker">
-          svg + png sequence → lottie, entirely in-browser
-        </p>
+        <img
+          src="https://raw.githubusercontent.com/draftswithea/draftswithea/main/assets/draftswithea-indicator.png"
+          alt="Logo"
+          width={200}
+        />
+        <p>svg + png sequence → lottie, entirely in-browser</p>
         <h1>SVG/PNG frame sequence → Lottie</h1>
         <p>
           Drop in one or more .zip files, each holding a numbered sequence of

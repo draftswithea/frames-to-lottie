@@ -1,19 +1,22 @@
 @import url("https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap");
 
 :root {
-  --bg: #fdf8f7;
+  --bg: #fff7f1;
   --surface: #ffffff;
-  --surface-sunken: #f8efee;
-  --ink: #2b1a21;
-  --ink-soft: #7b5f6a;
-  --accent: #cf4368;
-  --accent-soft: #fbe3e9;
-  --coral: #f88379;
-  --success: #2e9e6c;
-  --danger: #c6493f;
-  --border: #ecdcdd;
+  --surface-sunken: #fdeee6;
+  --ink: #4a3029;
+  --ink-soft: #87564f;
+  --accent: #ff9aac;
+  --accent-ink: #7a2e42;
+  --accent-soft: #ffe2e8;
+  --coral: #ffb199;
+  --tan: #c9944f;
+  --success: #6fbf96;
+  --danger: #e07a6e;
+  --muted: #969492;
+  --border: #f0dcd2;
   --checker-a: #ffffff;
-  --checker-b: #f3e9e9;
+  --checker-b: #f7ebe3;
   --mono: "Figtree", sans-serif;
   --sans: "Figtree", sans-serif;
   color-scheme: light dark;
@@ -21,36 +24,42 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #191217;
-    --surface: #221a20;
-    --surface-sunken: #1d1519;
-    --ink: #faf0f3;
-    --ink-soft: #bfa3ad;
-    --accent: #ff9db4;
-    --accent-soft: #3a1f2b;
-    --coral: #ff9d94;
-    --success: #4cc492;
-    --danger: #f0776c;
-    --border: #3a2a32;
-    --checker-a: #241b21;
-    --checker-b: #2c2128;
+    --bg: #2a211e;
+    --surface: #352a26;
+    --surface-sunken: #302622;
+    --ink: #fbefe9;
+    --ink-soft: #c9ada4;
+    --accent: #ffb3c1;
+    --accent-ink: #3d1a26;
+    --accent-soft: #4a3038;
+    --coral: #ffc2ad;
+    --tan: #e0ae6e;
+    --success: #9fd9b6;
+    --danger: #f2a197;
+    --muted: #a8a4a1;
+    --border: #4a3b36;
+    --checker-a: #352a26;
+    --checker-b: #3d322d;
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #191217;
-  --surface: #221a20;
-  --surface-sunken: #1d1519;
-  --ink: #faf0f3;
-  --ink-soft: #bfa3ad;
-  --accent: #ff9db4;
-  --accent-soft: #3a1f2b;
-  --coral: #ff9d94;
-  --success: #4cc492;
-  --danger: #f0776c;
-  --border: #3a2a32;
-  --checker-a: #241b21;
-  --checker-b: #2c2128;
+  --bg: #2a211e;
+  --surface: #352a26;
+  --surface-sunken: #302622;
+  --ink: #fbefe9;
+  --ink-soft: #c9ada4;
+  --accent: #ffb3c1;
+  --accent-ink: #3d1a26;
+  --accent-soft: #4a3038;
+  --coral: #ffc2ad;
+  --tan: #e0ae6e;
+  --success: #9fd9b6;
+  --danger: #f2a197;
+  --muted: #a8a4a1;
+  --border: #4a3b36;
+  --checker-a: #352a26;
+  --checker-b: #3d322d;
 }
 
 * {
